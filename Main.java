@@ -11,6 +11,10 @@ public class Main {
     };
 
     static final String[] LEVEL_NAMES = {"Лёгкий", "Средний", "Сложный"};
+
+    // Множитель очков за сложность: лёгкий, средний, сложный
+    static final double[] LEVEL_BONUS = {1.0, 1.5, 2.0};
+
     static final Random RANDOM = new Random();
 
     public static void main(String[] args) {
@@ -56,7 +60,8 @@ public class Main {
         for (int i = 0; i < LEVELS.length; i++) {
             System.out.println((i + 1) + " - " + LEVEL_NAMES[i]
                     + " (число от " + LEVELS[i][0] + " до " + LEVELS[i][1]
-                    + ", попыток: " + LEVELS[i][2] + ")");
+                    + ", попыток: " + LEVELS[i][2]
+                    + ", множитель очков: x" + LEVEL_BONUS[i] + ")");
         }
 
         int choice = readInt(scanner, "Твой выбор (1-3): ", 1, 3);
@@ -115,7 +120,7 @@ public class Main {
             System.out.println("Осталось попыток: " + (maxAttempts - used));
         }
 
-        printResult(won, secret, used, maxAttempts, history);
+        printResult(won, secret, used, maxAttempts, history, level);
 
         return won;
     }
@@ -131,16 +136,24 @@ public class Main {
         return false;
     }
 
+    // Подсчёт очков: за скорость, умноженные на бонус уровня сложности
+    static double calculateScore(int level, int used, int maxAttempts) {
+        double base = (double) (maxAttempts - used + 1) / maxAttempts * 100;
+
+        return base * LEVEL_BONUS[level];
+    }
+
     // Вывод результата игры
     static void printResult(boolean won, int secret, int used,
-                            int maxAttempts, int[] history) {
+                            int maxAttempts, int[] history, int level) {
         System.out.println();
 
         if (won) {
-            double score = (double) (maxAttempts - used + 1) / maxAttempts * 100;
+            double score = calculateScore(level, used, maxAttempts);
 
-            System.out.println("ПОБЕДА! Ты угадал число " + secret + " за " + used + " попыт.");
-            System.out.printf("Твоя оценка: %.0f очков из 100%n", score);
+            System.out.println("ПОБЕДА! Ты угадал число " + secret + ". Попыток потрачено: " + used);
+            System.out.printf("Твоя оценка: %.0f очков (множитель уровня: x%.1f)%n",
+                    score, LEVEL_BONUS[level]);
         } else {
             System.out.println("ПОРАЖЕНИЕ! Попытки закончились. Я загадал число " + secret + ".");
         }
@@ -202,4 +215,3 @@ public class Main {
         }
     }
 }
-
